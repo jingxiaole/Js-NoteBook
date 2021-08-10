@@ -147,8 +147,6 @@ const obj = {name: 'bob', age: 23}
 
 ##### 	5、默认参数和剩余参数
 
-在说之前，现补充一个遗漏的点，就是对于字符串，新增加了三个方法，include 和 startWith endWith，入参是字符串，返回一个是否包含该字符串的boolean值.
-
 默认参数
 
 ​	默认参数的设定在之前是通过在函数内部进行条件判断进行判断
@@ -200,11 +198,171 @@ console.log(...arr) // ES6（spread）写法
 
 ​			箭头函数 （参数列表）=>  {函数体}  ，在函数体中只有返回值的情况下， 大括号可以省略。
 
+```
+const fn = n => n+1
+const fn1 = (n = 3, m = 2) => {
+	return n + m
+}
+```
+
+​	箭头函数的特点：
+
+​			1、简化的函数的书写格式，使函数看起来更加容读和书写
+
+​			2、它没有this的机制，不会改变this的指向，任何情况下都不会改变
+
+```
+name = 1
+const fn = (n,m) => {
+n = this.name 
+return n + m
+}
+
+// 非箭头函数的写法，this会指向函数调用者
+say : function (n, m) {
+const _this = this
+setTimeout( ()=> {
+	console.log(this.name) // undefined
+}, 1000)
+}
+```
+
+
+
 ##### 	7、对象字面量的增强
+
+​		对于对象用法的增强，主要表现在：
+
+​		1、如果想给对象的属性赋值一个变量值，并且该变量名和属性名一样，则可以省略写法。
+
+​		2、在对象中的方法也可以省略写，当方法名和属性名相同时，省略冒号,这里的this是指向调用对象方法的对象
+
+​		3、对于属性名的命名，必须使用明确的值，在es2015中，可以使用[]的方式对对象属性名进行命名
+
+```
+ const name = 'df'
+// 1、
+const obj = {
+ foo: 'foo',
+ name   //这里的name名字相同，可以省略写
+ 
+ // 2、
+ // fn : function fn () {console.log('eeeee...')}
+ // es2015中可以用
+ fn () {console.log('eeeee...')}
+ }
+ 
+//  3、
+// obj.Math.random():123  //写法是错误的
+// obj[Math.random()]:123
+// 在es2015中，新增了写法
+obj[Math.random()] = 123
+```
+
+在说之前，现补充一个遗漏的点，
+
+​		1、对于字符串，新增加了三个方法，include 和 startWith endWith，入参是字符串，返回一个是否包含该字符串的boolean值.
+
+​		2、assign方法：将源对象合并到目标对象中
+
+```
+const obj = {
+name: 'df'
+age: 12
+}
+const objDog = {
+	type: 'dog'
+}
+const action = { say : 'www'}
+const animal = Object.assign(objDog, obj, action) // 后面也可以跟多个参数，都会赋值到第一个目标对象中
+console.log(animal) // {name: 'df',age: 12,type: 'dog',say: 'www'}
+```
+
+​		具体的应用场景是：
+
+​			1、如果一个对象（o1）的属性引用了另一个对象（o2）的值，在修改o1的时候，也会修改o2的值，这里用到assign方法，将o2的值赋值给o1的话，两个就相互不影响了。
+
+```
+ const obj1 = function func () {
+ 	const name = Object.assign({},obj)
+ }
+ obj1.name = 'jxl'
+ console,log(obj.name) // df
+ console.log(obj1.name) // jxl
+```
+
+
 
 ##### 	8、proxy
 
+​	proxy对象是对之前的defineProperty的一次强大升级，这个对象相当于对象的一个门卫，对于对象的读取操作以及delete都会做到监听和过滤。
+
+```
+const obj = {
+    name: 'df',
+    age: 18
+}
+						//参数： t1 -- 目标对象  t2 -- {}，方法的对象
+const proxyObject = new Proxy(obj, {
+    get (targe, property) { // 对于读取对象属性进行监视
+        console.log(targe, property);
+        return property in obj ? obj[property] : 'error'
+    },
+    set (targe, property,val) { // 对于函数属性的写入进行监视 
+        console.log(targe, property,val);
+        if (property === 'age') {
+            if(!Number.isInteger(val)) throw new TypeError(`${val} is not number`)
+        }
+    }
+})  
+console.log(proxyObject.name);  // { name: 'df', age: 18 } name   df
+proxyObject.age = 123 // { name: 'df', age: 18 } age 123
+console.log(proxyObject.age);//  18
+```
+
+​			对于Object的proxy 和 defineProperty 的对比
+
+​				1、proxy中有对delete操作的监听，而defineProperty没有
+
+​				2、proxy更好的支持对数组对象的监听，对原数组方法进行重写的方式实现。（vue.js所使用的方式）
+
+​				3、proxy是以非侵入的方式监管了对象的读写，即对已经定义好的操作，不需要对对象本身进行过多的操作就可以监听到读写
+
+```
+const list = []
+
+const listProxy = new Proxy(list, {
+    set (targe, property, val) {
+        console.log(targe, property, val);
+        targe[property] = val // 这里会自动监听到数组的索引进行赋值
+        return true // 不写返回值会报错
+    }
+})
+
+listProxy.push(100)   // [] 0 100    [ 100 ] length 1
+```
+
+
+
 ##### 	9、reflect
+
+​	reflect是Object对象的一个静态类，里面有处理对象的操作的14个方法，这14个方法就是proxy对象的默认实现，即Proxy内部默认调用了REflect对象的方法
+
+Reflect存在的意义在于统一提供了一套操纵对象的API
+
+```
+const obj = {
+    name: 'df',
+    age: 18
+}
+console.log(Reflect.has(obj, 'age'));  // 类似  'age' in obj 
+console.log(Reflect.defineProperty(obj, 'age'));  // 类似  delete obj.age
+console.log(Reflect.ownKeys(obj, 'age'));  // 类似  Object.keys(obj)
+
+// 之前的方法会被慢慢取代掉，建议使用Reflect的方法
+```
+
+
 
 ##### 	10、promise
 
@@ -214,4 +372,6 @@ console.log(...arr) // ES6（spread）写法
 
 ##### 	13、symbol
 
-##### 	14、迭代器和生成器
+##### 14、for ... of ... 
+
+##### 	15、迭代器和生成器
