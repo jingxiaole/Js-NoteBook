@@ -344,7 +344,7 @@ listProxy.push(100)   // [] 0 100    [ 100 ] length 1
 
 
 
-##### 	9、reflect
+##### 	9、Reflect
 
 ​	reflect是Object对象的一个静态类，里面有处理对象的操作的14个方法，这14个方法就是proxy对象的默认实现，即Proxy内部默认调用了REflect对象的方法
 
@@ -362,11 +362,98 @@ console.log(Reflect.ownKeys(obj, 'age'));  // 类似  Object.keys(obj)
 // 之前的方法会被慢慢取代掉，建议使用Reflect的方法
 ```
 
+##### 	10、Promise
 
-
-##### 	10、promise
+​	Promise是ES6新增的链式调用所使用的类，多数用于异步请求，属于微任务类型。
 
 ##### 	11、class类
+
+​		1、在之前的js中，我们会通过定义函数的方式进行构造函数的创建，在通过new 一个构造函数的类来实现一种独立的数据类型（Class）。
+
+```
+function Person (name) {
+    this.name = name
+    this.say = function (){
+        console.log('这是一个构造函数方法', this)
+    }
+}
+// 通过定义在原型链上的方式来进行类之间数据共享
+
+const person = new Person('df')
+person.say()
+person.property.action = function () {console.log('原型链上的数据共享')}
+```
+
+​		现在，ES6中，定义了一个class关键字来定义类，通java、php这些面向对象语言一样中类的功能类似（强调，JavaScript是面向函数式编程）。
+
+```
+class Dog {
+    constructor (name,age) { // 这是构造器，对象一经创建就立即执行的类，里面的参数就是new对象时候传入的参数
+        this.name = name
+        this.age = age
+    }
+    say () { // 之前都是将方法放在原型上或者属性上，不能直接定义，现在可以了
+        console.log('这是一个calss创建的类', this)
+    }
+}
+```
+
+​		2、通过静态方法来创建对象，静态方法只能函数自己来调用，它的实例对象不能调用，而实例方法只能通过它的实例对象来调用，它本身不能调用。实例方法都是定义在类原型上的，而通过关键字static修饰后，这个方法就变成了静态方法，只能通过类名去调用了。
+
+```
+class Dog {
+    constructor (name,age) { // 这是构造器，对象一经创建就立即执行的类，里面的参数就是new对象时候传入的参数
+        this.name = name
+        this.age = age
+    }
+    say () { // 之前都是将方法放在原型上或者属性上，不能直接定义，现在可以了
+        console.log('这是一个calss创建的类', this)
+    }
+    static action (name,age) {
+        console.log('这是Dog类的静态方法')
+        return new Dog(name, age)
+    }
+}
+
+const ha = Dog.action('哈士奇', 3)
+console.log(ha);  // 这是Dog类的静态方法    Dog { name: '哈士奇', age: 3 }
+```
+
+3、 静态方法中的this是是指向当前类型，而不是当前对象。
+
+4、使用extends关键字来实现继承一个父类，通过super关键字来调用继承的父类的属性和方法
+
+```
+class Dog {
+    constructor (name,age) { // 这是构造器，对象一经创建就立即执行的类，里面的参数就是new对象时候传入的参数
+        this.name = name
+        this.age = age
+    }
+    say () { // 之前都是将方法放在原型上或者属性上，不能直接定义，现在可以了
+        console.log('这是一个calss创建的类', this)
+    }
+    static action (name,age) {
+        console.log('这是Dog类的静态方法')
+        return new Dog(name, age)
+    }
+}
+
+class MinDog extends Dog {
+    constructor (name,age,type) {
+        super(name,age) // super关键字是用来调用父类 的，这里相当于在调用父类的构造方法
+        this._type = type
+    }
+    hello () {
+        super.say()
+        console.log('上一句是调用父类super打印出来的');
+    }
+}
+
+const ha = new MinDog('哈士奇', 3, 'man')
+ha.hello() // 这是一个calss创建的类 MinDog { name: '哈士奇', age: 3, _type: 'man' }   // 上一句是调用父类super打印出来的
+```
+
+
 
 ##### 	12、set、map
 
