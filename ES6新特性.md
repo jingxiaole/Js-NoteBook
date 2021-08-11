@@ -457,8 +457,163 @@ ha.hello() // 这是一个calss创建的类 MinDog { name: '哈士奇', age: 3, 
 
 ##### 	12、set、map
 
-##### 	13、symbol
+​		set 数据结构
+
+​			你可以将set结构看作是一个array的结构，但是区别是set的值都是唯一的值，不能重复，因此set经常应用的场景是数组去重。
+
+​	set的方法：
+
+​			1、add 因为该方法的返回值是一个set类型，所以可以链式调用。
+
+​			2、size 相当于array 的length属性
+
+​			3、delete  删除值
+
+​			4、clear  清除set
+
+​			5、has  类似于array的include	
+
+​			6、forEach  循环
+
+```
+const arr = new Set() // 参数可以放入数组array
+
+// add 方法 返回 set，因此可以链式调用,且有重复的话会省略不加入
+arr.add(1).add(2).add(2) // [1,2]
+
+// set 不等同于arr 是一个伪数组结构，通过Array的from方法可以将其变成数组结构
+console.log(Array.from(arr));
+console.log(...arr); // 通过解构也可以
+
+// size -> length
+console.log(arr.size); // 2
+
+// has 方法  检查set中是否包含 对应值
+
+console.log(arr.has(i)); // true
+
+// delete  删除
+console.log(arr.delete(1)); // [2]
+
+// clear  清空set
+console.log(arr.clear); // []
+```
+
+map 数据结构
+
+​	map是<key, value>结构的真正意义上的实现，这里的key是可以存储任意类型的数据，而在object对象中，对于key值，即使我们不是存放的String类型的数据，它也会自动给我们使用toString的方法。
+
+```
+const obj = {}
+obj[true] = '123'
+obj[1] = 1
+obj[{a: 1}] = 'a = 1'
+ // 打结果都是使用过toString方法的键
+console.log(Object.keys(obj)); //  [ '1', 'true', '[object Object]' ]
+```
+
+​	map 的使用方法：
+
+​		set 方法  存数据
+
+​		get方法  获取方法
+
+​		delete 方法  删除键值对
+
+​		has 方法  判断是否存在
+
+​		clear 方法 清楚map
+
+​		forEeach方法  遍历map    （value， key）
+
+##### 	13、Symbol
+
+​		Symbol数据类型，符号数据类型，它的每一次创建都是独一无二的，其参数是为其添加说明内容，每一个
+
+```
+const s =  Symbol()
+console.log(s); // Symbol()  -- 这是一个值，Symbol值
+console.log(typeof s); // Symbol
+console.log(Symbol() === Symbol()); // false    
+
+const obj = {}
+obj[Symbol()] = 213
+obj[Symbol('foo')] = 123
+obj[Symbol(123)] = 321
+
+console.log(obj); // { [Symbol()]: 213, [Symbol('foo')]: 123, [Symbol(123)]: 321 }
+
+```
+
+symbol都是独一无二 ，不相等的，常用的场景是为对象进行属性名的命名，那么现在对象就有String和Symbol两个格式的属性命名。
+
+Symbold特点：
+
+```
+const s =  Symbol()
+// 特点一：每一个Symbol值都是独一无二的
+console.log(Symbol() === Symbol() );  // false
+
+// 特点二： 通过全局注册或者它的内置静态方法for可以拿到同一份Symbol()值
+    const s1 = Symbol()
+    console.log(s1 === s1); // true
+    // for方法是用来维护同一个字符串的参数的Symbol值，传入的参数如果不是String类型，也会在内部转化为String
+    const s2 = Symbol.for(123)
+    const s3 = Symbol.for('123')
+    console.log(s2 === s3); // true
+
+    // 特点三： Symbol中自带了很多自定义常量，用于实现对象的自定义属性标签
+    const obj= {}
+    console.log(obj.toString()); // [object Object]这个字符串就是属性标签
+    // 通过Symbol的自带常量可以为这些属性从新定义 （这块内容不太懂，后续再理解）
+    obj[Symbol.toStringTag] = 'XXX'
+    console.log(obj.toString()); // [object XXX]
+
+
+    // 特点四：通过Symbol定义的内置属性是无法通过 forEach、Object.keys、json.stringify 方式拿到值的 -- 这些都是获取到的字符串属性名
+    // 只有通过Object.getOwnPropertySymbol可以取到全部symbol值
+```
+
+
 
 ##### 14、for ... of ... 
+
+​		1、for 循环，使用于遍历数组，而且可以使用break中途退出
+
+​		2、for ... in ... 和方法foerEach 循环键值对数组或对象，但是不能brake
+
+​		3、for ... of ... ,ES6新增的循环方式，可以遍历所有的可循环数据，并且有brake中途退出，作为以后主要使用的方式，它可以遍历数组、对象、map、set、伪数组等数据结果
+
+```
+// 数组
+const arr = [1,2,3,4]
+for( i of arr) {
+    console.log(i);
+}
+// set
+
+const set1 = new Set(arr)
+for( i of set1) {
+    console.log(i);
+}
+
+// map
+const m = new Map()
+m.set('name','df')
+m.set('age',18)
+for(const [i,key] of m) {
+    console.log(i,key);
+}
+// 对象
+const obj = {
+    name: 'jxl',
+    age: 23
+}
+for( i of obj) {
+    console.log(i);
+}
+```
+
+
 
 ##### 	15、迭代器和生成器
