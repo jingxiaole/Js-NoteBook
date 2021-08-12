@@ -609,11 +609,78 @@ const obj = {
     name: 'jxl',
     age: 23
 }
-for( i of obj) {
-    console.log(i);
+// 这里的循环不能执行，是因为Object没有实现Symbol.iterator的可迭代接口，详情看下面迭代器的介绍
+```
+
+##### 	15、迭代器和生成器
+
+​	迭代器是什么，他是一种模式。
+
+​	对于上面for...of...的方法可迭代的实现，主要是通过它原型对象上实现的Symbol.iterator接口来完成的。
+
+```
+ // 这里我们创建一个数组
+ 	const arr = [1,2,3]
+ 	const t = arr[Symbol.iterator]() //调用iterator方法可以得到该方法的执行体，里面有一个next()方法，这个方法就是循环中指向下一个地址的指针
+ 	
+ 	console.log(t.next()) // {value: '1', done: false} // 这里得到的对象就是每次循环的对象值（value）和是否完成循环（done）
+ 	
+```
+
+这里为Object添加一个Symbol.iterator的方法，让其实现循环，要是没有Symbol.iterator方法，只要我们手动去实现该方法，就可以实现迭代器，继而进行遍历。
+
+```
+const obj ={
+    arr:  ['df', 'foo', 'fn'],
+    // 这里其实也是利用了闭包的机制，进行循环处理的。iterator的方法可以根据结构自己进行循环
+    [Symbol.iterator]: function () {
+         const self = this // 因为下面是函数，this指向会变，所以临时保存
+         let index = 0 // 记录完成循环个数
+        return { // 返回一个迭代器对象
+             next: function () { // 返回一个可迭代函数
+                 const result =  { // 迭代结果对象
+                     value: self.arr[index],
+                     done: self.arr.length <= index
+                 }
+                 index++
+                 return result
+             }   
+        }
+    }
+}
+
+for (const i of obj) {
+    console.log(i,'循环体哈哈哈');
 }
 ```
 
 
 
-##### 	15、迭代器和生成器
+生成器
+
+​	这里先说一个生成器函数，function  * fn () {} 的格式，这种函数可以解决异步编程带来的代码嵌套的问题，其实，它内部就实现了Symbol.iterator方法的实现，对于自定义对象的Symbol.iterator方法，可以通过生成器去实现。
+
+```
+const obj = {
+    name: ['df', 'foo', 'fn'],
+    age: [12, 16, 18],
+    [Symbol.iterator]: function * () { // 这里通过 generator 函数进行 Symbol.iterator 的定义
+        const tol = [...this.age, ...this.name]
+        for ( const i of tol) {
+            yield i
+        }
+    }
+}
+
+for (const i of obj ) {
+    console.log(i,'generator');
+}
+```
+
+
+
+
+
+结束
+
+​	到这里，ES6的常用特性包括一些代码的实现就算是总结完了，在平常的工作或者学习中，要多使用才能尽快的掌握。
